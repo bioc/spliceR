@@ -2,51 +2,86 @@
 #include "R_ext/Rdynload.h"
 #include "Rdefines.h"
 
-void hello_you(char **name) {
-    printf("Hello, %s!\n", name[0]);
-}
-
-void sum(int *a, int *b, int*sum)
-{
-	// printf("Hello %d,%d\n", *a,*b);
-	// *a = *a * *b;
-	// printf("Hello %d,%d\n", *a,*b);
-	*sum = *a + *b;
-}
-
-void foo(int *nin, double *x)
-{
-	int n = nin[0];
-
-	int i;
-
-	for (i=0; i<n; i++)
-		x[i] = x[i] * x[i];
-}
-
 void findIdenticalExons(int *exon1, int *exon2, int *identical)
 {
-	if ((exon1[0] == exon2[0]) & exon1[1] == exon2[1])
+	if ((exon1[0] == exon2[0]) & (exon1[1] == exon2[1]))
 		identical[0] = 1;
 	else
 		identical[0] = 0;
 }
 
-// R_NativePrimitiveArgType hello_youArgs[1] = {STRSXP};
-// R_NativePrimitiveArgType sumArgs[2] = {INTSXP,INTSXP};
-// R_CMethodDef cMethods[] =
-// {
-//     {"hello_you", (DL_FUNC)&hello_you, 1, hello_youArgs},
-//     {"sum", (DL_FUNC)&sum, 1, sumArgs},
-//     {NULL,NULL, 0}
-// };
+void findOverlappingExons(int *exon1, int *exon2, int *identical)
+{
 
-// void R_init_hello_you(DllInfo *dll)
-// {
-//     R_registerRoutines(dll,cMethods,NULL,NULL,NULL);
-// }
+	identical[0] = 0;
+	if ((exon1[0] <  exon2[1]) & (exon1[0] >= exon2[0])) identical[0] = 1;
+	if ((exon1[1] <= exon2[1]) & (exon1[1] >  exon2[0])) identical[0] = 1;
+	if ((exon1[0] <  exon2[0]) & (exon1[1] >  exon2[1])) identical[0] = 1;
 
+}
 
+void determineLeftOverlappingAStype(int *exon1, int *exon2, int *isStrandEqualToPlus, int *ExonIndexesAnalyzed, int *asTypes)
+{
+	asTypes[0] = 0; asTypes[1] = 0;
+	int isExonIndexEqualTo11[2] = {0,0};
+	if ( ExonIndexesAnalyzed[0] == 1 ) isExonIndexEqualTo11[0] = 1;
+	if ( ExonIndexesAnalyzed[1] == 1 ) isExonIndexEqualTo11[1] = 1;
+	if ( isStrandEqualToPlus[0] )
+	{
+		if( exon1[0] != exon2[0] )
+		{
+			if ( isExonIndexEqualTo11[0] | isExonIndexEqualTo11[1] )
+			{
+				return;
+			} 
+			else {
+				asTypes[1] = 1;
+			}
+		}
+	} else
+	{
+		if( exon1[0] != exon2[0] )
+		{
+			if ( isExonIndexEqualTo11[0] | isExonIndexEqualTo11[1] )
+			{
+				return;
+			} 
+			else {
+				asTypes[0] = 1;
+			}
+		}
+	}
+}
 
-//dyn.load("test.so")
-//.C("sum", as.integer(3), as.integer(4), as.integer(0))
+void determineRightOverlappingAStype(int *exon1, int *exon2, int *isStrandEqualToPlus, int *ExonIndexesAnalyzed, int *numberOfExons, int *asTypes)
+{
+	asTypes[0] = 0; asTypes[1] = 0;
+	int isExonIndexEqualToEnd[2] = {0,0};
+	if ( ExonIndexesAnalyzed[0] == numberOfExons[0] ) isExonIndexEqualToEnd[0] = 1;
+	if ( ExonIndexesAnalyzed[1] == numberOfExons[1] ) isExonIndexEqualToEnd[1] = 1;
+	if ( isStrandEqualToPlus[0] )
+	{
+		if( exon1[1] != exon2[1] )
+		{
+			if ( isExonIndexEqualToEnd[0] | isExonIndexEqualToEnd[1] )
+			{
+				return;
+			} 
+			else {
+				asTypes[0] = 1;
+			}
+		}
+	} else
+	{
+		if( exon1[1] != exon2[1] )
+		{
+			if ( isExonIndexEqualToEnd[0] | isExonIndexEqualToEnd[1] )
+			{
+				return;
+			} 
+			else {
+				asTypes[1] = 1;
+			}
+		}
+	}
+}
