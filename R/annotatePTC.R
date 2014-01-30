@@ -17,13 +17,9 @@ annotatePTC <- function(transcriptData, cds, genomeObject, PTCDistance=50)
 	#Establish exon features full copy
 	exon_features_full <- transcriptData[["exon_features"]]
 
-
+    ### Filter
 	#Get only + and - strands
-	#transcriptData[["exon_features"]] <- transcriptData[["exon_features"]][match(strand(transcriptData[["exon_features"]]),c("+", "-"), nomatch=0)>0]
 	transcriptData[["exon_features"]] <- transcriptData[["exon_features"]][match(as.vector(strand(transcriptData[["exon_features"]])),c("+", "-"), nomatch = 0) > 0]
-
-	#cuffDB_spliceR[["exon_features"]] <- cuffDB_spliceR[["exon_features"]][ match(strand(cuffDB_spliceR[["exon_features"]]),c("+", "-"))>0]
-
 	# Correct chr names from Ensamble
 	if(length(grep('chr',as.character(seqnames(transcriptData[["exon_features"]]))))== 0)
 	{
@@ -34,7 +30,13 @@ annotatePTC <- function(transcriptData, cds, genomeObject, PTCDistance=50)
 		seqlevels(transcriptData[["exon_features"]])<- sub('chrMT','chrM',seqlevels(transcriptData[["exon_features"]]))
 		seqlevels(transcriptData[["transcript_features"]])<- sub('chrMT','chrM',seqlevels(transcriptData[["transcript_features"]]))   
 	}
-
+    # Remove chr not in BSgenome object
+	seqToRemove <- seqlevels(transcriptData[["exon_features"]])[ which(! seqlevels(transcriptData[["exon_features"]]) %in% names(genomeObject) ) ]
+    if(length(seqToRemove) != 0) {
+        transcriptData[["exon_features"]] <- transcriptData[["exon_features"]][ which( !seqnames(transcriptData[["exon_features"]]) %in% seqToRemove ),]
+    }
+	
+    
 	exonSeq  <- getSeq(genomeObject, transcriptData[["exon_features"]])
 
 	unFactor <- function(df)

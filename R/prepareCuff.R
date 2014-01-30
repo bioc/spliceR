@@ -1,4 +1,4 @@
-prepareCuff <- function(cuffDB, fixCufflinksAnnotationProblem=T)
+prepareCuff <- function(cuffDB, fixCufflinksAnnotationProblem=T, removeNonChanonicalChr=T)
 {
     if(!is.logical(fixCufflinksAnnotationProblem)) { stop("The fixCufflinksAnnotationProblem parameter must be set to either TRUE or FALSE, indicating whether to try to correct the Cufflinks annotation problem") }
     ### Get isoform and gene info
@@ -29,9 +29,24 @@ prepareCuff <- function(cuffDB, fixCufflinksAnnotationProblem=T)
 	isoformFeatures			<-data.frame(dbGetQuery(cuffDB@DB,isoformFeatureQuery),stringsAsFactors=F)
 	
 	### Remove unknown chromosomes
-	isoformData <- isoformData[grep('^[1-9mc]', isoformData$locus, ignore.case=T, perl=T),] # only that those that starts with either a number or c or m (meaning random ect are removed - they cause problems in annotatePTC)
-	isoformFeatures <- isoformFeatures[grep('^[1-9mc]', isoformFeatures$seqnames, ignore.case=T, perl=T),] # only that those that starts with either a number or c or m (meaning random ect are removed - they cause problems in annotatePTC)
-	
+    if(removeNonChanonicalChr) {
+        toRemoveData <- c(
+            grep('^[^1-9mc]', isoformData$locus, ignore.case=T, perl=T), # all those who does not start with 1:9 c or m
+            grep('_', isoformData$locus, ignore.case=T, perl=T) # underscore is use in chr13_random
+            )
+        if(length(toRemoveData) != 0) {
+            isoformData <- isoformData[-toRemoveData,]
+        }
+        
+        toRemoveFeature <- c(
+            grep('^[^1-9mc]', isoformFeatures$seqnames, ignore.case=T, perl=T), # all those who does not start with 1:9 c or m
+            grep('_', isoformFeatures$seqnames, ignore.case=T, perl=T)
+        )
+        if(length(toRemoveFeature) != 0) {
+            isoformFeatures <- isoformFeatures[-toRemoveFeature,] # only that those that starts with either a number or c or m (meaning random ect are removed - they cause problems in annotatePTC)    
+        }
+    }
+		
 	### Make sure none of the data.frames only contain isoforms not found in the other data.frame
 	isoformData <- isoformData[which(isoformData$isoform_id %in% isoformFeatures$isoform_id),]
 	isoformFeatures <- isoformFeatures[which(isoformFeatures$isoform_id %in% isoformData$isoform_id),]
