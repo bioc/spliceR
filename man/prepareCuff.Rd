@@ -10,7 +10,6 @@ prepareCuff(cuffDB, fixCufflinksAnnotationProblem=T,removeNonChanonicalChr=T)
 \arguments{
   \item{cuffDB}{a \code{cuffDB} object, produced by cummeRbund. This object must have been generated with cummeRbund, using the \code{gtf} parameter (see example), for spliceR to extract transcript model and exon information.}
   \item{fixCufflinksAnnotationProblem}{Fixes problems with Cufflinks gene symbol annotation. Please see the vignette for additional information.}
-  \item{removeNonChanonicalChr}{Flag to remove chromosomes with non-canonical names.}  
 }
 
 \details{
@@ -47,7 +46,7 @@ A \code{SpliceRList} containing a \code{transcript_features} \code{GRanges} obje
 and a \code{exon_features} GRanges object containing exon model information.
 }
 
-\author{Kristoffer Knudsen, Johannes Waage}
+\author{Kristoffer Vitting-Seerup, Johannes Waage}
 
 \references{
 Vitting-Seerup K , Porse BT, Sandelin A, Waage J. (2014) spliceR: an R package for classification of alternative splicing and prediction of coding potential from RNA-seq data. BMC Bioinformatics 15:81.
