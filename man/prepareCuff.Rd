@@ -5,7 +5,7 @@
 Prepare assembled RNA-seq data from Cufflinks for spliceR.
 }
 \usage{
-prepareCuff(cuffDB, fixCufflinksAnnotationProblem=T,removeNonChanonicalChr=T)
+prepareCuff(cuffDB, fixCufflinksAnnotationProblem=T)
 }
 \arguments{
   \item{cuffDB}{a \code{cuffDB} object, produced by cummeRbund. This object must have been generated with cummeRbund, using the \code{gtf} parameter (see example), for spliceR to extract transcript model and exon information.}
